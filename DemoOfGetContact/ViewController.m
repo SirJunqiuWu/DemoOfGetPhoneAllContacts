@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import <AddressBook/AddressBook.h>
 #import <ContactsUI/ContactsUI.h>
-#import <ContactsUI/ContactsUI.h>
+#import "DetailViewController.h"
 
 @interface ViewController ()<UITableViewDataSource,UITableViewDelegate>
 {
@@ -69,6 +69,7 @@
 #pragma mark - 按钮点击事件
 
 - (void)rightItemPressed {
+    [self fetchContactWithContactStore:contactStore];
     [infoTable reloadData];
 }
 
@@ -134,23 +135,35 @@
     }
     else
     {
-        [self fetchContactWithContactStore:contactStore];//访问通讯录  
+        [self fetchContactWithContactStore:contactStore];
     }
 }
 
 - (void)fetchContactWithContactStore:(CNContactStore *)cnContactStore {
     
+    [dataArray removeAllObjects];
     /**
      *  有权限访问
      */
     if ([CNContactStore authorizationStatusForEntityType:CNEntityTypeContacts] == CNAuthorizationStatusAuthorized)
     {
         NSError *error = nil;
-        //创建数组,必须遵守CNKeyDescriptor协议,放入相应的字符串常量来获取对应的联系人信息
-        NSArray <id<CNKeyDescriptor>> *keysToFetch = @[CNContactFamilyNameKey, CNContactGivenNameKey, CNContactPhoneNumbersKey];
-        //创建获取联系人的请求
+        
+        /**
+         *  关键:创建数组,必须遵守CNKeyDescriptor协议,放入相应的字符串常量来获取对应的联系人信息(用户的信息都有对应的key，选取指定的key获取对应信息)
+         */
+        NSArray <id<CNKeyDescriptor>> *keysToFetch = @[CNContactFamilyNameKey, CNContactGivenNameKey, CNContactPhoneNumbersKey,CNContactImageDataKey];
+        
+
+        /**
+         * 创建获取联系人的请求
+         */
         CNContactFetchRequest *fetchRequest = [[CNContactFetchRequest alloc] initWithKeysToFetch:keysToFetch];
-        //遍历查询
+        
+        
+        /**
+         *  遍历查询通讯录所有联系人
+         */
         [contactStore enumerateContactsWithFetchRequest:fetchRequest error:&error usingBlock:^(CNContact * _Nonnull contact, BOOL * _Nonnull stop)
         {
             if (!error)
@@ -189,10 +202,17 @@
     
 //    id tempPerson = dataArray[indexPath.row];
 //    NSString* tmpFirstName = (__bridge NSString*)ABRecordCopyValue((__bridge ABRecordRef)(tempPerson), kABPersonFirstNameProperty);
+    
     CNContact *tempConact = dataArray[indexPath.row];
     NSString *phone = ((CNPhoneNumber *)(tempConact.phoneNumbers.lastObject.value)).stringValue;
     cell.textLabel.text = [NSString stringWithFormat:@"%@     %@",tempConact.givenName,phone];
     return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    DetailViewController *vc = [[DetailViewController alloc]init];
+    vc.tempContact = dataArray[indexPath.row];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 
 @end

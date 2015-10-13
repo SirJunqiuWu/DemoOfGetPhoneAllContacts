@@ -16,6 +16,8 @@
 		048CD1AD1BCB5C9A0052AE70 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048CD1AC1BCB5C9A0052AE70 /* AddressBook.framework */; };
 		048CD1B11BCB81320052AE70 /* Contacts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048CD1B01BCB81320052AE70 /* Contacts.framework */; };
 		04A30FA41BCB83FD0005AA07 /* ContactsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A30FA31BCB83FD0005AA07 /* ContactsUI.framework */; };
+		04D59C621BCCA00F00BED807 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D59C611BCCA00F00BED807 /* DetailViewController.m */; settings = {ASSET_TAGS = (); }; };
+		04D59C641BCCA4FB00BED807 /* contact.png in Resources */ = {isa = PBXBuildFile; fileRef = 04D59C631BCCA4FB00BED807 /* contact.png */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,9 @@
 		048CD1AC1BCB5C9A0052AE70 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		048CD1B01BCB81320052AE70 /* Contacts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Contacts.framework; path = System/Library/Frameworks/Contacts.framework; sourceTree = SDKROOT; };
 		04A30FA31BCB83FD0005AA07 /* ContactsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ContactsUI.framework; path = System/Library/Frameworks/ContactsUI.framework; sourceTree = SDKROOT; };
+		04D59C601BCCA00F00BED807 /* DetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
+		04D59C611BCCA00F00BED807 /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
+		04D59C631BCCA4FB00BED807 /* contact.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = contact.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,10 +73,13 @@
 		048CD1931BCB5BF90052AE70 /* DemoOfGetContact */ = {
 			isa = PBXGroup;
 			children = (
+				04D59C631BCCA4FB00BED807 /* contact.png */,
 				048CD1971BCB5BF90052AE70 /* AppDelegate.h */,
 				048CD1981BCB5BF90052AE70 /* AppDelegate.m */,
 				048CD19A1BCB5BF90052AE70 /* ViewController.h */,
 				048CD19B1BCB5BF90052AE70 /* ViewController.m */,
+				04D59C601BCCA00F00BED807 /* DetailViewController.h */,
+				04D59C611BCCA00F00BED807 /* DetailViewController.m */,
 				048CD19D1BCB5BF90052AE70 /* Main.storyboard */,
 				048CD1A01BCB5BF90052AE70 /* Assets.xcassets */,
 				048CD1A21BCB5BF90052AE70 /* LaunchScreen.storyboard */,
@@ -156,6 +164,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04D59C641BCCA4FB00BED807 /* contact.png in Resources */,
 				048CD1A41BCB5BF90052AE70 /* LaunchScreen.storyboard in Resources */,
 				048CD1A11BCB5BF90052AE70 /* Assets.xcassets in Resources */,
 				048CD19F1BCB5BF90052AE70 /* Main.storyboard in Resources */,
@@ -172,6 +181,7 @@
 				048CD19C1BCB5BF90052AE70 /* ViewController.m in Sources */,
 				048CD1991BCB5BF90052AE70 /* AppDelegate.m in Sources */,
 				048CD1961BCB5BF90052AE70 /* main.m in Sources */,
+				04D59C621BCCA00F00BED807 /* DetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
