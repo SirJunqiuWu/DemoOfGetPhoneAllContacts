@@ -16,8 +16,8 @@
 		048CD1AD1BCB5C9A0052AE70 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048CD1AC1BCB5C9A0052AE70 /* AddressBook.framework */; };
 		048CD1B11BCB81320052AE70 /* Contacts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048CD1B01BCB81320052AE70 /* Contacts.framework */; };
 		04A30FA41BCB83FD0005AA07 /* ContactsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04A30FA31BCB83FD0005AA07 /* ContactsUI.framework */; };
-		04D59C621BCCA00F00BED807 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D59C611BCCA00F00BED807 /* DetailViewController.m */; settings = {ASSET_TAGS = (); }; };
-		04D59C641BCCA4FB00BED807 /* contact.png in Resources */ = {isa = PBXBuildFile; fileRef = 04D59C631BCCA4FB00BED807 /* contact.png */; settings = {ASSET_TAGS = (); }; };
+		04D59C621BCCA00F00BED807 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04D59C611BCCA00F00BED807 /* DetailViewController.m */; };
+		04D59C641BCCA4FB00BED807 /* contact.png in Resources */ = {isa = PBXBuildFile; fileRef = 04D59C631BCCA4FB00BED807 /* contact.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -293,6 +293,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = DemoOfGetContact/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jiaDai.DemoOfGetContact;
@@ -304,6 +305,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = DemoOfGetContact/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = jiaDai.DemoOfGetContact;

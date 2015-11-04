@@ -15,6 +15,7 @@
 {
     UITableView *infoTable;
     NSMutableArray *dataArray;
+    NSMutableDictionary *dataSectionData;
     
     /**
      *  创建CNContactStore对象,用与获取和保存通讯录信息
@@ -55,15 +56,15 @@
 #pragma mark - 创建UI
 
 - (void)setupUI {
-    
-    [self getAllContactsByContact];
-    
     infoTable = [[UITableView alloc]initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, self.view.frame.size.height) style:UITableViewStylePlain];
     infoTable.backgroundColor = [UIColor clearColor];
     infoTable.dataSource = self;
     infoTable.delegate = self;
+    infoTable.sectionIndexColor = [UIColor blackColor];
+    infoTable.sectionIndexBackgroundColor = [UIColor clearColor];
     [self.view addSubview:infoTable];
     
+    [self getAllContactsByContact];
 }
 
 #pragma mark - 按钮点击事件
@@ -177,7 +178,8 @@
             {
                 NSLog(@"error:%@", error.localizedDescription);  
             }  
-        }];  
+        }];
+        [self createSectionData];
     }
     else
     {
@@ -187,8 +189,22 @@
 
 #pragma mark - UITableViewSource && Delegate
 
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+    return [dataSectionData allKeys].count;
+}
+
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return dataArray.count;
+    NSArray *allKeys = [dataSectionData allKeys];
+    NSArray *arr = [dataSectionData objectForKey:allKeys[section]];
+    return arr.count;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+    return 44.0;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section {
+    return 44.0;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -202,17 +218,118 @@
     
 //    id tempPerson = dataArray[indexPath.row];
 //    NSString* tmpFirstName = (__bridge NSString*)ABRecordCopyValue((__bridge ABRecordRef)(tempPerson), kABPersonFirstNameProperty);
-    
-    CNContact *tempConact = dataArray[indexPath.row];
+    NSArray *allKeys = [dataSectionData allKeys];
+    NSArray *arr = [dataSectionData objectForKey:allKeys[indexPath.section]];
+    CNContact *tempConact = arr[indexPath.row];
     NSString *phone = ((CNPhoneNumber *)(tempConact.phoneNumbers.lastObject.value)).stringValue;
     cell.textLabel.text = [NSString stringWithFormat:@"%@     %@",tempConact.givenName,phone];
     return cell;
+}
+
+- (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
+    return [dataSectionData allKeys];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index {
+    NSArray *allKeys = [dataSectionData allKeys];
+    return [allKeys indexOfObject:title];
+}
+
+- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
+    
+    UIView *headerView = [[UIView alloc]initWithFrame:CGRectMake(0, 0,infoTable.frame.size.width, 44)];
+    headerView.backgroundColor = [UIColor grayColor];
+    
+    UILabel *titleLbl = [[UILabel alloc]initWithFrame:CGRectMake(15,13, 200, 18)];
+    titleLbl.textAlignment = NSTextAlignmentLeft;
+    titleLbl.textColor = [UIColor blackColor];
+    titleLbl.font = [UIFont systemFontOfSize:18.0];
+    titleLbl.text  = [dataSectionData allKeys][section];
+    [headerView addSubview:titleLbl];
+    
+    return headerView;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     DetailViewController *vc = [[DetailViewController alloc]init];
     vc.tempContact = dataArray[indexPath.row];
     [self.navigationController pushViewController:vc animated:YES];
+}
+
+- (void)createSectionData
+{
+    if (dataSectionData==nil)
+    {
+        dataSectionData = [[NSMutableDictionary alloc] init];
+    }
+    else
+    {
+        [dataSectionData removeAllObjects];
+    }
+    for (CNContact *model in dataArray)
+    {
+        NSString *sectionKey = @"";
+
+        
+        /**
+         *  将姓名转换成拼音
+         */
+        NSString *pingYinName = [self transformMandarinToLatin:model.givenName];
+        
+        if ([pingYinName length]>0)
+        {
+            /**
+             *  取名字拼音的首字母
+             */
+            sectionKey = [pingYinName substringToIndex:1];
+        }
+        else
+        {
+            /**
+             *  得不到拼音首字母的归类至?
+             */
+            sectionKey = @"?";
+        }
+        
+        
+        /**
+         *  将首字母转换成大写
+         */
+        sectionKey = [sectionKey uppercaseString];
+        
+        NSMutableArray *sectionArray = [dataSectionData objectForKey:sectionKey];
+        
+        if (sectionArray == nil)
+        {
+            sectionArray = [[NSMutableArray alloc] init];
+            [dataSectionData setObject:sectionArray forKey:sectionKey];
+        }
+        [sectionArray addObject:model];
+    }
+}
+
+- (NSString*) transformMandarinToLatin:(NSString *)string {
+    if ([string length]==0) return string;
+    
+    NSMutableString *preString = [string mutableCopy];
+    CFStringTransform((CFMutableStringRef)preString, NULL, kCFStringTransformMandarinLatin,NO);
+    CFStringTransform((CFMutableStringRef)preString, NULL,kCFStringTransformStripDiacritics, NO);
+    if ([[(NSString *)string substringToIndex:1] compare:@"长"] ==NSOrderedSame) {
+        [preString replaceCharactersInRange:NSMakeRange(0, 5)withString:@"chang"];
+    }
+    if ([[(NSString *)string substringToIndex:1] compare:@"沈"] ==NSOrderedSame) {
+        [preString replaceCharactersInRange:NSMakeRange(0, 4)withString:@"shen"];
+    }
+    if ([[(NSString *)string substringToIndex:1] compare:@"厦"] ==NSOrderedSame) {
+        [preString replaceCharactersInRange:NSMakeRange(0, 3)withString:@"xia"];
+    }
+    if ([[(NSString *)string substringToIndex:1] compare:@"地"] ==NSOrderedSame) {
+        [preString replaceCharactersInRange:NSMakeRange(0, 3)withString:@"di"];
+    }
+    if ([[(NSString *)string substringToIndex:1] compare:@"重"] ==NSOrderedSame) {
+        [preString replaceCharactersInRange:NSMakeRange(0, 5) withString:@"chong"];
+    }
+    return preString;
 }
 
 @end
