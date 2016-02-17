@@ -16,6 +16,8 @@
     UITableView *infoTable;
     NSMutableArray *dataArray;
     NSMutableDictionary *dataSectionData;
+    NSMutableArray *allKeysArray;
+    NSMutableArray *sortkeysArray;
     
     /**
      *  创建CNContactStore对象,用与获取和保存通讯录信息
@@ -31,6 +33,8 @@
     self = [super init];
     if (self) {
         dataArray = [NSMutableArray array];
+        allKeysArray = [NSMutableArray array];
+        sortkeysArray = [NSMutableArray array];
     }
     return self;
 }
@@ -122,17 +126,17 @@
     {
         [contactStore requestAccessForEntityType:CNEntityTypeContacts completionHandler:^(BOOL granted, NSError * _Nullable error)
          {
-            if (error) return;
-            if (granted)
-            {
-                NSLog(@"授权访问通讯录");
-                [self fetchContactWithContactStore:contactStore];
-            }
-            else
-            {
-                NSLog(@"拒绝访问通讯录");
-            }  
-        }];  
+             if (error) return;
+             if (granted)
+             {
+                 NSLog(@"授权访问通讯录");
+                 [self fetchContactWithContactStore:contactStore];
+             }
+             else
+             {
+                 NSLog(@"拒绝访问通讯录");
+             }
+         }];
     }
     else
     {
@@ -155,7 +159,7 @@
          */
         NSArray <id<CNKeyDescriptor>> *keysToFetch = @[CNContactFamilyNameKey, CNContactGivenNameKey, CNContactPhoneNumbersKey,CNContactImageDataKey];
         
-
+        
         /**
          * 创建获取联系人的请求
          */
@@ -166,36 +170,36 @@
          *  遍历查询通讯录所有联系人
          */
         [contactStore enumerateContactsWithFetchRequest:fetchRequest error:&error usingBlock:^(CNContact * _Nonnull contact, BOOL * _Nonnull stop)
-        {
-            if (!error)
-            {
-                NSLog(@"familyName = %@", contact.familyName);//姓
-                NSLog(@"givenName = %@", contact.givenName);//名字
-                NSLog(@"phoneNumber = %@", ((CNPhoneNumber *)(contact.phoneNumbers.lastObject.value)).stringValue);//电话
-                [dataArray addObject:contact];
-            }
-            else
-            {
-                NSLog(@"error:%@", error.localizedDescription);  
-            }  
-        }];
+         {
+             if (!error)
+             {
+                 NSLog(@"familyName = %@", contact.familyName);//姓
+                 NSLog(@"givenName = %@", contact.givenName);//名字
+                 NSLog(@"phoneNumber = %@", ((CNPhoneNumber *)(contact.phoneNumbers.lastObject.value)).stringValue);//电话
+                 [dataArray addObject:contact];
+             }
+             else
+             {
+                 NSLog(@"error:%@", error.localizedDescription);
+             }
+         }];
         [self createSectionData];
     }
     else
     {
-        NSLog(@"拒绝访问通讯录");  
+        NSLog(@"拒绝访问通讯录");
     }
 }
 
 #pragma mark - UITableViewSource && Delegate
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return [dataSectionData allKeys].count;
+    return sortkeysArray.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    NSArray *allKeys = [dataSectionData allKeys];
-    NSArray *arr = [dataSectionData objectForKey:allKeys[section]];
+    NSString *key = sortkeysArray.count>0 ? sortkeysArray[section]:@"";
+    NSArray *arr = [dataSectionData objectForKey:key];
     return arr.count;
 }
 
@@ -216,10 +220,9 @@
     cell.backgroundColor = [UIColor clearColor];
     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     
-//    id tempPerson = dataArray[indexPath.row];
-//    NSString* tmpFirstName = (__bridge NSString*)ABRecordCopyValue((__bridge ABRecordRef)(tempPerson), kABPersonFirstNameProperty);
-    NSArray *allKeys = [dataSectionData allKeys];
-    NSArray *arr = [dataSectionData objectForKey:allKeys[indexPath.section]];
+    //    id tempPerson = dataArray[indexPath.row];
+    //    NSString* tmpFirstName = (__bridge NSString*)ABRecordCopyValue((__bridge ABRecordRef)(tempPerson), kABPersonFirstNameProperty);
+    NSArray *arr = [dataSectionData objectForKey:sortkeysArray[indexPath.section]];
     CNContact *tempConact = arr[indexPath.row];
     NSString *phone = ((CNPhoneNumber *)(tempConact.phoneNumbers.lastObject.value)).stringValue;
     cell.textLabel.text = [NSString stringWithFormat:@"%@     %@",tempConact.givenName,phone];
@@ -227,12 +230,11 @@
 }
 
 - (NSArray *)sectionIndexTitlesForTableView:(UITableView *)tableView {
-    return [dataSectionData allKeys];
+    return sortkeysArray;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index {
-    NSArray *allKeys = [dataSectionData allKeys];
-    return [allKeys indexOfObject:title];
+    return [sortkeysArray indexOfObject:title];
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section {
@@ -244,7 +246,7 @@
     titleLbl.textAlignment = NSTextAlignmentLeft;
     titleLbl.textColor = [UIColor blackColor];
     titleLbl.font = [UIFont systemFontOfSize:18.0];
-    titleLbl.text  = [dataSectionData allKeys][section];
+    titleLbl.text  = sortkeysArray[section];
     [headerView addSubview:titleLbl];
     
     return headerView;
@@ -252,7 +254,10 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     DetailViewController *vc = [[DetailViewController alloc]init];
-    vc.tempContact = dataArray[indexPath.row];
+    
+    NSString *key = sortkeysArray[indexPath.section];
+    NSArray *contactsArr = [dataSectionData objectForKey:key];
+    vc.tempContact = contactsArr[indexPath.row];
     [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -269,28 +274,13 @@
     for (CNContact *model in dataArray)
     {
         NSString *sectionKey = @"";
-
+        
         
         /**
-         *  将姓名转换成拼音
+         *  将姓名转换成拼音,并取名字拼音的首字母 ,得不到拼音首字母的归类至?
          */
         NSString *pingYinName = [self transformMandarinToLatin:model.givenName];
-        
-        if ([pingYinName length]>0)
-        {
-            /**
-             *  取名字拼音的首字母
-             */
-            sectionKey = [pingYinName substringToIndex:1];
-        }
-        else
-        {
-            /**
-             *  得不到拼音首字母的归类至?
-             */
-            sectionKey = @"?";
-        }
-        
+        sectionKey =  pingYinName.length>0?[pingYinName substringToIndex:1]:@"?";
         
         /**
          *  将首字母转换成大写
@@ -301,11 +291,22 @@
         
         if (sectionArray == nil)
         {
+            [allKeysArray addObject:sectionKey];
             sectionArray = [[NSMutableArray alloc] init];
             [dataSectionData setObject:sectionArray forKey:sectionKey];
         }
         [sectionArray addObject:model];
     }
+    
+    
+    NSArray *sortKeysArr = [allKeysArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        return [obj1 compare:obj2 options:NSNumericSearch];
+    }];
+    [sortkeysArray addObjectsFromArray:sortKeysArr];
+}
+
+- (void)sortAllContactByFristPinying {
+    
 }
 
 - (NSString*) transformMandarinToLatin:(NSString *)string {
